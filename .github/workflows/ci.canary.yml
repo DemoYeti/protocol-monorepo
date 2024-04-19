@@ -23,8 +23,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Check changeset
-        run: tasks/check-changeset.sh ${{ github.sha }} dev
+      - name: Create build set
+        run: tasks/create-build-set.sh ${{ github.sha }} dev origin
 
   essential-build-and-test:
     name: Build and test essential packages of dev branch

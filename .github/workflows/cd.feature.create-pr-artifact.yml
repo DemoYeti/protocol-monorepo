@@ -41,8 +41,8 @@ jobs:
           echo "  .locked" ${{ github.event.pull_request.locked }}
           echo "  .draft" ${{ github.event.pull_request.draft }}
 
-      - name: Check changeset
-        run: tasks/check-changeset.sh ${{ github.sha }} dev
+      - name: Create build set
+        run: tasks/create-build-set.sh ${{ github.sha }} dev origin
 
       - name: Install dependencies
         if: env.PUBLISH_PR_ARTIFACT == 1
