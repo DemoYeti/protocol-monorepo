@@ -73,7 +73,7 @@
     ];
 
     # minimem development shell
-    minimumDevInputs = commonDevInputs ++ ethDevInputs ++ node18DevInputs;
+    minimumDevInputs = commonDevInputs ++ ethDevInputs ++ node20DevInputs;
 
     # additional tooling for whitehat hackers
     whitehatInputs = with pkgs; [
@@ -111,9 +111,7 @@
     mkShell = o : pkgs.mkShell ({
       SOLC = pkgs.lib.getExe pkgs.${solcVer};
     } // o);
-
-    # ci-spec-with-ghc
-    ci-spec-with-ghc = ghcVer : mkShell {
+    mkShellForSpecCI = ghcVer : mkShell {
       buildInputs = with pkgs; [
         cabal-install
         haskell.compiler.${ghcVer}
@@ -140,14 +138,17 @@
     };
 
     # CI shells
+    devShells.ci-default = mkShell {
+      buildInputs = ciInputs ++ minimumDevInputs;
+    };
     devShells.ci-node18 = mkShell {
       buildInputs = ciInputs ++ commonDevInputs ++ ethDevInputs ++ node18DevInputs;
     };
     devShells.ci-node20 = mkShell {
       buildInputs = ciInputs ++ commonDevInputs ++ ethDevInputs ++ node20DevInputs;
     };
-    devShells.ci-spec-ghc92 = ci-spec-with-ghc ghcVer92;
-    devShells.ci-spec-ghc94 = ci-spec-with-ghc ghcVer94;
+    devShells.ci-spec-ghc92 = mkShellForSpecCI ghcVer92;
+    devShells.ci-spec-ghc94 = mkShellForSpecCI ghcVer94;
     devShells.ci-hot-fuzz = mkShell {
       buildInputs = with pkgs; ciInputs ++ commonDevInputs ++ ethDevInputs ++ [
         slither-analyzer
