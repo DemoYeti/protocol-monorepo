@@ -17,9 +17,9 @@ GRAPH_NETWORKS=( $($JQ -r .[] ./hosted-service-networks.json) ) || exit 1
 # shellcheck disable=SC2034
 SATSUMA_NETWORKS=( "polygon-mainnet" "xdai-mainnet" "eth-mainnet" "eth-sepolia" "optimism-mainnet" "base-mainnet")
 # shellcheck disable=SC2034
-SUPERFLUID_NETWORKS=( "polygon-mainnet" "xdai-mainnet" "base-mainnet" "optimism-mainnet" "arbitrum-one" "celo-mainnet" "bsc-mainnet" "avalanche-c" "optimism-sepolia" "scroll-sepolia" "scroll-mainnet" "degenchain")
+SUPERFLUID_NETWORKS=( "polygon-mainnet" "xdai-mainnet" "base-mainnet" "optimism-mainnet" "arbitrum-one" "celo-mainnet" "bsc-mainnet" "avalanche-c" "optimism-sepolia" "scroll-sepolia" "scroll-mainnet" "degenchain" "base-sepolia")
 # shellcheck disable=SC2034
-GOLDSKY_NETWORKS=( "polygon-mainnet" "xdai-mainnet" "base-mainnet" "optimism-mainnet" "arbitrum-one" "celo-mainnet" "bsc-mainnet" "avalanche-c" "optimism-sepolia" "scroll-sepolia" "scroll-mainnet")
+GOLDSKY_NETWORKS=( "polygon-mainnet" "xdai-mainnet" "eth-mainnet" "base-mainnet" "optimism-mainnet" "arbitrum-one" "bsc-mainnet" "avalanche-c" "optimism-sepolia" "scroll-sepolia" "scroll-mainnet" "eth-sepolia")
 # shellcheck disable=SC2034
 AIRSTACK_NETWORKS=( "degenchain")
 
@@ -74,7 +74,6 @@ deploy_to_graph() {
     local -A legacyNetworkNames=(
         ["xdai-mainnet"]="xdai"
         ["polygon-mainnet"]="matic"
-        ["polygon-mumbai"]="mumbai"
     )
 
     local graphNetwork="${legacyNetworkNames[$network]:-$network}"
@@ -125,12 +124,12 @@ deploy_to_superfluid() {
 
 deploy_to_goldsky() {
     local network="$1"
-    local subgraphName="protocol-$DEPLOYMENT_ENV-$network/1.0.0"
     # TODO: use tagging?
-    # TODO: how to handle versions?
 
+    local subgraphName="protocol-$DEPLOYMENT_ENV-$network/$VERSION_LABEL"
+
+    # Note: when using Graph CLI to deploy, it implicitly triggers build too, but Goldsky CLI doesn't, so we do it explicitly.
     $GRAPH_CLI build
-    # Note: when using Graph CLI to deploy, it implicitly triggers build too, but Goldsky CLI doesn't.
 
     echo "********* Deploying $network subgraph $subgraphName to Goldsky. **********"
     $GOLDSKY_CLI subgraph deploy \
@@ -172,7 +171,7 @@ deploy_to() {
         exit 1
     fi
 
-    npx ts-node ./scripts/buildNetworkConfig.ts "$network"
+    npx ts-node ./scripts/buildNetworkConfig.ts "$network" "$vendor"
 
     # prepare the manifest prior to deployment
     # this generates the subgraph.yaml and
