@@ -14,9 +14,14 @@
       inputs.flake-utils.follows = "flake-utils";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    mk-cache-key = {
+      url = "github:hellwolf/mk-cache-key.nix/master";
+      inputs.flake-utils.follows = "flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, foundry, solc } :
+  outputs = { self, nixpkgs, flake-utils, foundry, solc, mk-cache-key } :
   flake-utils.lib.eachDefaultSystem (system:
   let
     minDevSolcVer = "solc_0_8_11"; # minimum solidity version used for external development
@@ -70,6 +75,7 @@
     ciInputs = with pkgs; [
       # codecov requries gnupg binary
       gnupg
+      mk-cache-key.packages.${system}.default
     ];
 
     # minimem development shell
@@ -138,6 +144,9 @@
     };
 
     # CI shells
+    devShells.mk-cache-key = mkShell {
+      buildInputs = [ mk-cache-key.packages.${system}.default ];
+    };
     devShells.ci-default = mkShell {
       buildInputs = ciInputs ++ minimumDevInputs;
     };
